@@ -48,6 +48,6 @@ Do not repeatedly rewrite the same page without a new source, new user question,
 
 ## Related
 
-- [Harness Engineering](../concepts/harness-engineering.md)
-- [Loop And Hooks](../concepts/loop-and-hooks.md)
+- [LLM Wiki Schema](../schema/llm-wiki-schema.md)
+- [Ingest Workflow](ingest.md)
 - [Raw Item To Wiki Pages Pipeline](../pipelines/raw-item-to-wiki-pages.md)

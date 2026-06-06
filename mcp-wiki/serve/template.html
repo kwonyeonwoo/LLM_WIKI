@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CV / Physical AI LLM Wiki</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  :root { --cv:#2563eb; --physical-ai:#16a34a; --intersection:#db2777; --meta:#6b7280; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, sans-serif; color:#1f2937; display:flex; height:100vh; }
+  #sidebar { width:280px; border-right:1px solid #e5e7eb; padding:12px; overflow-y:auto; }
+  #main { flex:1; display:flex; flex-direction:column; min-width:0; }
+  #toolbar { padding:8px 12px; border-bottom:1px solid #e5e7eb; display:flex; gap:8px; align-items:center; }
+  #content { flex:1; display:flex; min-height:0; }
+  #graph { flex:1; }
+  #page { flex:1; padding:20px 28px; overflow-y:auto; display:none; }
+  #search { flex:1; padding:6px 10px; border:1px solid #d1d5db; border-radius:6px; }
+  button { padding:6px 10px; border:1px solid #d1d5db; background:#fff; border-radius:6px; cursor:pointer; }
+  button.active { background:#111827; color:#fff; }
+  .nav-item { padding:4px 6px; border-radius:4px; cursor:pointer; font-size:14px; }
+  .nav-item:hover { background:#f3f4f6; }
+  .group-label { font-weight:600; font-size:12px; text-transform:uppercase; color:#6b7280; margin:10px 0 4px; }
+  .badge { display:inline-block; font-size:11px; padding:1px 6px; border-radius:10px; color:#fff; }
+  .node circle { cursor:pointer; stroke:#fff; stroke-width:1.5px; }
+  .node text { font-size:11px; pointer-events:none; }
+  .link { stroke:#cbd5e1; stroke-width:1px; }
+  #backlinks { margin-top:24px; border-top:1px solid #e5e7eb; padding-top:12px; }
+  #backlinks a, #page a { color:#2563eb; }
+  .filter-row { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .filter-row label { font-size:12px; display:flex; gap:3px; align-items:center; }
+</style>
+</head>
+<body>
+<div id="sidebar">
+  <strong>지식 도메인</strong>
+  <div class="filter-row" id="domainFilters"></div>
+  <div id="nav"></div>
+</div>
+<div id="main">
+  <div id="toolbar">
+    <input id="search" placeholder="검색 (제목·본문)..." />
+    <button id="viewGraph" class="active">그래프</button>
+    <button id="viewPage">페이지</button>
+  </div>
+  <div id="content">
+    <svg id="graph"></svg>
+    <div id="page"></div>
+  </div>
+</div>
+<script>
+const COLORS = {cv:"#2563eb","physical-ai":"#16a34a",intersection:"#db2777",meta:"#6b7280"};
+let DATA, byId, activeDomains = new Set();
+
+fetch("data.json").then(r=>r.json()).then(d=>{ DATA=d; init(); });
+
+function init(){
+  byId = Object.fromEntries(DATA.nodes.map(n=>[n.id,n]));
+  const domains = [...new Set(DATA.nodes.map(n=>n.domain))];
+  activeDomains = new Set(domains);
+  const df = d3.select("#domainFilters");
+  domains.forEach(dm=>{
+    const l = df.append("label");
+    l.append("input").attr("type","checkbox").property("checked",true)
+      .on("change",function(){ this.checked?activeDomains.add(dm):activeDomains.delete(dm); renderNav(); drawGraph(); });
+    l.append("span").attr("class","badge").style("background",COLORS[dm]||"#999").text(dm);
+  });
+  renderNav(); drawGraph();
+  d3.select("#search").on("input", function(){ filterSearch(this.value.toLowerCase()); });
+  d3.select("#viewGraph").on("click",()=>show("graph"));
+  d3.select("#viewPage").on("click",()=>show("page"));
+}
+
+function show(v){
+  d3.select("#graph").style("display", v==="graph"?"block":"none");
+  d3.select("#page").style("display", v==="page"?"block":"none");
+  d3.select("#viewGraph").classed("active",v==="graph");
+  d3.select("#viewPage").classed("active",v==="page");
+}
+
+function renderNav(filter){
+  const nav = d3.select("#nav"); nav.html("");
+  const groups = {};
+  DATA.nodes.filter(n=>activeDomains.has(n.domain))
+    .filter(n=>!filter || n.title.toLowerCase().includes(filter) || n.markdown.toLowerCase().includes(filter))
+    .forEach(n=>{ (groups[n.domain]=groups[n.domain]||[]).push(n); });
+  Object.keys(groups).sort().forEach(dm=>{
+    nav.append("div").attr("class","group-label").text(dm);
+    groups[dm].forEach(n=>{
+      nav.append("div").attr("class","nav-item").text(n.title).on("click",()=>openPage(n.id));
+    });
+  });
+}
+
+function filterSearch(q){ renderNav(q); }
+
+function openPage(id){
+  const n = byId[id]; if(!n) return;
+  let html = marked.parse(n.markdown);
+  // rewrite relative .md links to in-app navigation
+  const page = d3.select("#page").html(`<span class="badge" style="background:${COLORS[n.domain]||'#999'}">${n.domain}</span>
+    ${n.maturity?` <span class="badge" style="background:#9ca3af">${n.maturity}</span>`:""}<div>${html}</div>`);
+  page.selectAll("a").each(function(){
+    const href = this.getAttribute("href")||"";
+    if(href.endsWith(".md")){
+      const resolved = resolveRel(id, href);
+      if(byId[resolved]){ this.onclick = (e)=>{e.preventDefault(); openPage(resolved);}; }
+    }
+  });
+  // backlinks
+  const back = DATA.edges.filter(e=>e.target===id).map(e=>e.source);
+  if(back.length){
+    const bl = page.append("div").attr("id","backlinks");
+    bl.append("strong").text("이 페이지를 참조하는 페이지");
+    back.forEach(b=>{ bl.append("div").append("a").attr("href","#").text(byId[b].title).on("click",ev=>{ev.preventDefault();openPage(b);}); });
+  }
+  show("page");
+}
+
+function resolveRel(fromId, href){
+  const parts = fromId.split("/"); parts.pop();
+  href.split("#")[0].split("/").forEach(seg=>{
+    if(seg==="..") parts.pop(); else if(seg!==".") parts.push(seg);
+  });
+  return parts.join("/");
+}
+
+function drawGraph(){
+  const svg = d3.select("#graph"); svg.selectAll("*").remove();
+  const w = svg.node().clientWidth, h = svg.node().clientHeight;
+  const nodes = DATA.nodes.filter(n=>activeDomains.has(n.domain)).map(n=>({...n}));
+  const ok = new Set(nodes.map(n=>n.id));
+  const links = DATA.edges.filter(e=>ok.has(e.source)&&ok.has(e.target)).map(e=>({...e}));
+  const deg = {}; links.forEach(l=>{deg[l.source]=(deg[l.source]||0)+1;deg[l.target]=(deg[l.target]||0)+1;});
+  const sim = d3.forceSimulation(nodes)
+    .force("link", d3.forceLink(links).id(d=>d.id).distance(90))
+    .force("charge", d3.forceManyBody().strength(-260))
+    .force("center", d3.forceCenter(w/2,h/2));
+  const link = svg.append("g").selectAll("line").data(links).join("line").attr("class","link");
+  const node = svg.append("g").selectAll("g").data(nodes).join("g").attr("class","node")
+    .call(d3.drag()
+      .on("start",(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y;})
+      .on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y;})
+      .on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);d.fx=null;d.fy=null;}));
+  node.append("circle").attr("r",d=>6+2*(deg[d.id]||0)).attr("fill",d=>COLORS[d.domain]||"#999").on("click",(e,d)=>openPage(d.id));
+  node.append("text").attr("x",10).attr("y",4).text(d=>d.title);
+  sim.on("tick",()=>{
+    link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+    node.attr("transform",d=>`translate(${d.x},${d.y})`);
+  });
+}
+window.addEventListener("resize",()=>{ if(d3.select("#graph").style("display")!=="none") drawGraph(); });
+</script>
+</body>
+</html>

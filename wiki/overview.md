@@ -1,6 +1,6 @@
 # Overview
 
-이 위키는 LLM Wiki 패턴을 실험하기 위한 markdown-only 지식베이스다. 현재 주제는 LLM 기반 지식관리이며, 첫 출처는 Andrej Karpathy의 LLM Wiki gist다.
+이 위키는 LLM Wiki 패턴을 실험하기 위한 markdown-only 지식베이스다. 현재 지식 도메인은 **컴퓨터비전 / 피지컬 AI**이며, 검증된 출처(arXiv, Meta AI, INRIA 등)에서 수집한 개념을 축적한다. 운영 메커니즘은 Karpathy의 LLM Wiki gist 패턴을 따른다.
 
 ## What This Wiki Is
 
@@ -17,11 +17,18 @@
 
 현재는 다음 질문에 답할 수 있도록 구성되어 있다.
 
-- LLM Wiki란 무엇인가?
-- RAG와 무엇이 다른가?
+도메인 (컴퓨터비전 / 피지컬 AI):
+- Object detection 패러다임(two-stage / one-stage / DETR)은 무엇인가?
+- SAM 계열 promptable segmentation은 어떻게 동작하는가?
+- NeRF와 3D Gaussian Splatting의 차이는?
+- Vision foundation model(CLIP, DINOv2 등)이란?
+- VLA 모델이 CV와 로봇을 어떻게 잇는가?
+- Sim-to-real transfer와 sensor fusion의 핵심 방법은?
+
+위키 운영:
+- LLM Wiki란 무엇이고 RAG와 무엇이 다른가?
 - Markdown만으로 운영하면 어떤 장단점이 있는가?
-- 새 자료를 어떻게 ingest 하는가?
-- 위키를 어떻게 점검하는가?
+- 새 자료를 어떻게 ingest / 점검하는가?
 
 ## Maintenance Rule
 

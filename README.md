@@ -28,13 +28,21 @@
 
 ## 현재 시작점
 
-이 위키는 Karpathy의 LLM Wiki gist를 첫 자료로 삼아 시작한다.
+현재 지식 도메인은 **컴퓨터비전 / 피지컬 AI**다. 운영 메커니즘은 Karpathy의 LLM Wiki gist 패턴을 따른다.
 
+도메인 지식:
+- [Concept: Object Detection Overview](wiki/concepts/cv/object-detection-overview.md)
+- [Concept: Segmentation (SAM Family)](wiki/concepts/cv/segmentation-sam-family.md)
+- [Concept: 3D Reconstruction (NeRF & Gaussian Splatting)](wiki/concepts/cv/3d-reconstruction-nerf-gs.md)
+- [Concept: Vision Foundation Models](wiki/concepts/cv/vision-foundation-models.md)
+- [Concept: VLA Models](wiki/concepts/intersection/vla-models.md)
+- [Concept: Sim-to-Real Transfer](wiki/concepts/physical-ai/sim-to-real-transfer.md)
+- [Concept: Sensor Fusion](wiki/concepts/physical-ai/sensor-fusion.md)
+
+위키 시스템:
 - [Source: Karpathy LLM Wiki](sources/karpathy-llm-wiki.md)
-- [Source Pack: Agentic Coding Basics](sources/agentic-coding-basics/README.md)
 - [Concept: LLM Wiki](wiki/concepts/llm-wiki.md)
 - [Concept: RAG vs LLM Wiki](wiki/concepts/rag-vs-llm-wiki.md)
-- [Concept: Agentic Coding](wiki/concepts/agentic-coding.md)
 - [Schema: LLM Wiki Schema](wiki/schema/llm-wiki-schema.md)
 - [Pipeline: Raw Item To Wiki Pages](wiki/pipelines/raw-item-to-wiki-pages.md)
 - [Workflow: Ingest](wiki/workflows/ingest.md)
