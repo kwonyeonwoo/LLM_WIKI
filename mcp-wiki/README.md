@@ -91,9 +91,9 @@ MVP 6종. 핵심 루프 = 검색 → 읽기 → 목록 → 생성 → 갱신 →
 
 **(a) 질의**
 ```
-사용자: "SAM 계열 segmentation 페이지 찾아줘"
-→ search_wiki(query="SAM segmentation", domain="cv")
-→ read_page(path="wiki/concepts/cv/segmentation-sam-family.md")
+사용자: "example 개념 페이지 찾아줘"
+→ search_wiki(query="example", domain="cv")
+→ read_page(path="wiki/concepts/cv/example-concept.md")
 ```
 
 **(b) 새 지식 추가**

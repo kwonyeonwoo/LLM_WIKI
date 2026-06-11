@@ -2,7 +2,7 @@
 
 이 파일은 위키의 탐색 진입점이다. 질문에 답하기 전 먼저 읽고, 관련 페이지로 이동한다.
 
-현재 지식 도메인: **컴퓨터비전 / 피지컬 AI** (정의: [mcp-wiki/01-knowledge-domain.md](mcp-wiki/01-knowledge-domain.md)).
+현재 지식 도메인: **(여기에 너의 도메인을 적어라)**. 도메인 분류·헤딩은 아래 `## Concepts — ...` 섹션과 `mcp-wiki/mcp_wiki/server.py`의 `_DOMAIN_HEADINGS`를 함께 바꾸면 된다. 기본값은 예시로 cv / physical-ai / intersection을 둔다.
 
 ## Core
 
@@ -11,6 +11,7 @@
 - [Task](TASK.md): 현재 과제 완료 조건.
 - [Journal](journal.md): append-only 작업 저널.
 - [Agent Instructions](AGENTS.md): LLM이 따라야 할 운영 규칙.
+- [Rules](rules.md): 추가 컨텍스트·관례 (도메인 설정, 안전, 검증 게이트).
 - [LLM Wiki Schema](wiki/schema/llm-wiki-schema.md): 저장소 구조와 유지보수 불변조건.
 
 ## Wiki System (meta)
@@ -22,31 +23,21 @@
 
 ## Concepts — Computer Vision
 
-- [Object Detection Overview](wiki/concepts/cv/object-detection-overview.md): two-stage / one-stage / DETR 검출 패러다임.
-- [Segmentation: SAM Family](wiki/concepts/cv/segmentation-sam-family.md): promptable segmentation foundation model (SAM, SAM 2).
-- [3D Reconstruction: NeRF & Gaussian Splatting](wiki/concepts/cv/3d-reconstruction-nerf-gs.md): novel-view synthesis와 3D 복원.
-- [Vision Foundation Models](wiki/concepts/cv/vision-foundation-models.md): CLIP, DINOv2, ViT, MAE.
+- [Example Concept](wiki/concepts/cv/example-concept.md): 예시 시드. 자기 자료로 첫 페이지를 만들면 지우거나 덮어쓴다.
 
 ## Concepts — Physical AI
 
-- [Sim-to-Real Transfer](wiki/concepts/physical-ai/sim-to-real-transfer.md): 시뮬레이터 학습 정책의 실로봇 전이.
-- [Sensor Fusion](wiki/concepts/physical-ai/sensor-fusion.md): 카메라·LiDAR·radar 융합 인지.
+_(아직 없음 — 첫 페이지를 만들면 여기 자동 등록된다.)_
 
 ## Concepts — Intersection (CV × Physical AI)
 
-- [VLA Models](wiki/concepts/intersection/vla-models.md): vision-language-action end-to-end 로봇 정책 (RT-2, OpenVLA, π0).
+_(아직 없음)_
 
 ## Sources
 
 - [Sources README](sources/README.md): 출처 노트 관리 방식.
 - [Karpathy LLM Wiki](sources/karpathy-llm-wiki.md): Andrej Karpathy의 LLM Wiki gist 요약 (위키 시스템 출처).
-- [Object Detection](sources/cv-physical-ai/object-detection.md)
-- [Segment Anything (SAM / SAM 2)](sources/cv-physical-ai/segment-anything.md)
-- [NeRF / 3D Gaussian Splatting](sources/cv-physical-ai/nerf-gaussian-splatting.md)
-- [VLA Models](sources/cv-physical-ai/vla-models.md)
-- [Sim-to-Real Transfer](sources/cv-physical-ai/sim-to-real.md)
-- [Multi-modal Sensor Fusion](sources/cv-physical-ai/sensor-fusion.md)
-- [Vision Foundation Models](sources/cv-physical-ai/vision-foundation-models.md)
+- [Example Source](sources/example-source.md): 예시 출처 노트.
 
 ## Workflows
 
@@ -59,12 +50,15 @@
 
 - [Raw Item To Wiki Pages](wiki/pipelines/raw-item-to-wiki-pages.md): raw item을 source note와 wiki page로 변환하는 핵심 파이프라인.
 
-## MCP Wiki (설계 문서)
+## MCP Wiki (도구 + 설계 문서)
 
+- [MCP Wiki README](mcp-wiki/README.md): MCP 서버 + 뷰어 사용법.
 - [지식 도메인 정의](mcp-wiki/01-knowledge-domain.md)
 - [의사결정 라운드](mcp-wiki/02-decision-rounds.md)
 - [PRD / 사양서](mcp-wiki/03-prd.md)
-- [MCP Wiki README](mcp-wiki/README.md)
+- [에이전트 사양](mcp-wiki/04-agent-spec.md)
+- [하네스 & 스킬](mcp-wiki/05-harness-and-skills.md)
+- [접근 계획](mcp-wiki/06-access-plan.md)
 
 ## Templates
 
@@ -75,6 +69,4 @@
 
 ## Open Questions
 
-- 시드 7개 외 다음 ingest 우선순위(예: occupancy, world model, grasping) 결정 필요.
-- CV : Physical AI : intersection 비중 재조정 (현재 4:2:1).
-- 출처 arxiv abs 다수 → 출판본 수치와 대조 점검 필요.
+- (여기에 너의 위키에서 미해결인 질문을 남긴다.)

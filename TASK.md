@@ -1,25 +1,23 @@
 # TASK
 
-Status: done
+Status: template (너의 첫 과제로 바꿔라)
 
-Goal: Prepare the initial markdown-only LLM Wiki repository based on Agentic Coding Basics.
+Goal: (예) 내 자료 N건을 ingest 해 도메인 X의 첫 위키 페이지들을 만든다.
 
 Done when:
 
-- `Agentic_Coding_Basics.zip` is represented as Markdown source notes.
-- Core wiki pages explain LLM Wiki, Agentic Coding Basics concepts, schema, and maintenance.
-- The raw item to wiki pages pipeline is documented.
-- `index.md`, `log.md`, and `journal.md` are updated.
-- A submission zip containing repository source Markdown files is generated.
+- 처리할 자료가 `sources/`에 출처 노트로 정리됨.
+- 핵심 개념이 `wiki/concepts/<domain>/`에 페이지로 생성됨.
+- `index.md`·`log.md`가 갱신됨.
+- `link_check` → broken/unindexed 0.
+- `serve/build_site.py`로 빌드해 뷰어에서 확인됨.
 
 Negative guardrails:
 
-- Do not require a database, vector index, executable script, or MCP server.
-- Do not submit `.git/` or temporary extraction files.
-- Do not treat dangerous CLI permission modes as recommended defaults.
+- 검증되지 않은 출처로 사실을 단정하지 않는다.
+- write는 `wiki/` 밖으로 나가지 않는다. 삭제는 사람이 git으로.
+- 위험 CLI 권한 모드를 기본값으로 쓰지 않는다.
 
 Log:
 
-- [2026-06-01] Task created for assignment packaging.
-- [2026-06-01] Added Agentic Coding Basics source notes, concept pages, schema, pipeline, maintenance workflow, and submission manifest.
-- [2026-06-01] Generated `submissions/llm-wiki-repository-sources.zip` with Markdown repository source files.
+- [YYYY-MM-DD] Task created from template.

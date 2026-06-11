@@ -1,0 +1,33 @@
+#!/bin/sh
+# Pre-commit hook: enforce wiki link/index integrity before allowing a commit.
+# Install:  git config core.hooksPath hooks
+#
+# Runs link_check from the MCP server against the repo root. Blocks the commit
+# if any broken internal link or unindexed concept page is found.
+
+repo_root="$(git rev-parse --show-toplevel)"
+cd "$repo_root/mcp-wiki" || exit 0   # tool not present: skip rather than block
+
+python - "$repo_root" <<'PY'
+import sys, pathlib
+sys.path.insert(0, ".")
+import os
+os.environ["WIKI_ROOT"] = sys.argv[1]
+try:
+    from mcp_wiki.server import link_check
+except Exception as e:
+    print("pre-commit: mcp_wiki not importable (%s); skipping link_check" % e)
+    sys.exit(0)
+
+r = link_check()
+broken, unindexed = r["broken_links"], r["unindexed_pages"]
+if broken or unindexed:
+    print("pre-commit: wiki integrity check FAILED")
+    for b in broken:
+        print("  broken link: %s -> %s" % (b["file"], b["link"]))
+    for u in unindexed:
+        print("  unindexed page: %s" % u)
+    print("fix the above or run with --no-verify to bypass.")
+    sys.exit(1)
+print("pre-commit: link_check ok (0 broken, 0 unindexed)")
+PY
