@@ -175,6 +175,26 @@ python -m http.server -d site 8000             # http://localhost:8000
 - 의존성 0(빌드는 stdlib). 클라이언트는 CDN의 d3 + marked 사용. 정적이라 GitHub Pages 배포 가능.
 - 파일 변경 후 `build_site.py` 재실행 또는 커밋 훅/CI로 재빌드.
 
+### 4.6 사이트 챗봇 (브라우저 내 Wiki Guide)
+
+사이트의 **챗봇** 탭은 [Wiki Guide](04-agent-spec.md)(읽기 전용)를 브라우저에서 쓴다. 백엔드 없이 동작:
+
+1. 질문 입력 → 로드된 위키 페이지에서 키워드로 관련 페이지 top-4 검색(client-side).
+2. 그 페이지들을 context로 묶어 system 프롬프트(위키 근거로만 답, 없으면 "위키에 없음")와 함께 LLM API에 전송.
+3. 답 + 근거 페이지 링크 표시(클릭 시 페이지 뷰로 이동).
+
+**에이전트(provider)는 교체 가능.** 어댑터: `anthropic`(Claude), `openai`(OpenAI 및 호환 엔드포인트 — Ollama·groq 등 `endpoint`로). 추가 provider는 `serve/template.html`의 `callProvider`에 분기 추가.
+
+**설정 위치:**
+- `serve/agent-config.js` — provider/model/endpoint 프리셋. **로컬 전용, gitignore**(레포에 안 올라감). 없으면 빌드가 공란 `agent-config.example.js`를 복사.
+- 레포는 `agent-config.example.js`를 **공란으로** 배포 → clone 후 본인이 설정:
+  ```bash
+  cd mcp-wiki/serve && cp agent-config.example.js agent-config.js   # provider/model 채움
+  ```
+- **API 키**: 파일에 두지 않는다. 사이트 ⚙ 설정에서 입력 → 브라우저 `localStorage`에만 저장.
+
+> ⚠ 보안: 정적 사이트라 브라우저가 LLM API를 **직접 호출**한다 → API 키가 클라이언트에 노출된다. 개인/로컬 용도 전제. 공개 배포(예: GitHub Pages)에 키 넣지 마라. 다중 사용자·키 은닉이 필요하면 별도 백엔드 프록시를 둬야 한다([06 접근 계획 Stack B](06-access-plan.md)).
+
 ## 5. 저장 구조
 
 source of truth = markdown 파일. 검색 인덱스는 파일에서 파생되는 재생성 가능 캐시 ([Round 2](02-decision-rounds.md)).

@@ -27,6 +27,8 @@ Status: active (계획 확정, 구현 전)
 
 원칙: 대화형(학습·활용)은 Claude+MCP에 위임, 시각화(열람)만 정적 사이트가 담당. 커스텀 웹앱에 채팅·추론 재구현 금지(과설계).
 
+**갱신(2026-06-11).** 학습·활용을 **사이트 내 챗봇**으로도 연다 ([Round 9](02-decision-rounds.md)). 백엔드 없이 브라우저가 LLM API를 직접 호출하는 Wiki Guide(read-only) — provider 교체형(anthropic/openai 등), 레포는 provider 공란 배포. 이로써 MCP 클라이언트 없이도 사이트만으로 질의 가능. 키 은닉이 필요한 공개 배포는 여전히 백엔드 프록시(아래 P3/Stack B) 몫.
+
 ## 2. 단계 계획
 
 ### P1 — Wiki Guide 연결 (학습·활용 시동, 코드 0)

@@ -160,6 +160,19 @@ Status: active (Round 0~7, append 중)
 
 ---
 
+## Round 9 — 사이트 챗봇 (provider 교체형, 2026-06-11)
+
+**질문.** 정적 사이트에서도 에이전트를 챗봇으로 쓰고 싶다. 백엔드 없이 어떻게? 어떤 에이전트를?
+
+**결정.** 사이트에 **브라우저 내 챗봇**(Wiki Guide, read-only) 추가. 백엔드 없음:
+- 검색(client-side) → 관련 페이지 top-4를 context로 → LLM API 직접 호출 → 답 + 출처.
+- **provider 교체형**: anthropic/openai 어댑터, endpoint로 OpenAI 호환(Ollama 등)까지. 사용자가 선택.
+- **설정 분리**: 로컬은 `agent-config.js`(gitignore)로 Claude 프리셋, 레포는 `agent-config.example.js` **공란** 배포 → 클로너가 본인 것으로 설정. API 키는 파일에 안 두고 사이트 ⚙ 설정 → localStorage.
+
+근거: 정적 사이트 철학 유지(백엔드 0). Guide는 쓰기 권한이 없어 브라우저 직접 호출로 충분. provider를 코드 밖 설정으로 빼 "사용자가 원하는 에이전트" 요구 충족. 보안: 브라우저 직접 호출은 키 노출 → 개인/로컬 전제, 공개 배포 시 백엔드 프록시 필요([06](06-access-plan.md)). 상세 [README §4.6](README.md), [04 §4](04-agent-spec.md).
+
+---
+
 ## 현재까지 합의 요약
 
 - 스택: Python + 공식 MCP SDK
@@ -170,6 +183,7 @@ Status: active (Round 0~7, append 중)
 - 시각화: 정적 사이트(Stack A) 구현, 동적 웹앱(Stack B) 보류
 - 에이전트: Wiki Guide(read) / Wiki Keeper(write) 2역할 분리
 - 접근 표면: 2분할 — 정적 사이트(열람) + Claude+MCP(학습·활용). P1 Guide 연결 우선 ([Round 8](#round-8--사용자-접근-표면-열람--학습--활용-2026-06-11))
+- 사이트 챗봇: provider 교체형 브라우저 내 Guide, 레포는 provider 공란 배포 ([Round 9](#round-9--사이트-챗봇-provider-교체형-2026-06-11))
 
 ## Open Questions (다음 라운드 후보)
 
