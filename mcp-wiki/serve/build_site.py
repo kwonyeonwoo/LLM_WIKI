@@ -80,11 +80,11 @@ def main() -> None:
     (OUT / "data.json").write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     here = Path(__file__).resolve().parent
     shutil.copyfile(here / "template.html", OUT / "index.html")
-    # Agent preset for the chatbot: prefer local agent-config.js, else the blank example.
-    cfg = here / "agent-config.js"
+    # Chatbot bridge config (no API key): prefer local guide-config.js, else example.
+    cfg = here / "guide-config.js"
     if not cfg.exists():
-        cfg = here / "agent-config.example.js"
-    shutil.copyfile(cfg, OUT / "agent-config.js")
+        cfg = here / "guide-config.example.js"
+    shutil.copyfile(cfg, OUT / "guide-config.js")
     print(f"built {len(data['nodes'])} pages, {len(data['edges'])} links -> {OUT}")
 
 

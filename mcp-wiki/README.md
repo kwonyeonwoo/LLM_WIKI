@@ -175,25 +175,26 @@ python -m http.server -d site 8000             # http://localhost:8000
 - 의존성 0(빌드는 stdlib). 클라이언트는 CDN의 d3 + marked 사용. 정적이라 GitHub Pages 배포 가능.
 - 파일 변경 후 `build_site.py` 재실행 또는 커밋 훅/CI로 재빌드.
 
-### 4.6 사이트 챗봇 (브라우저 내 Wiki Guide)
+### 4.6 사이트 챗봇 (브라우저 내 Wiki Guide, **API 키 없음**)
 
-사이트의 **챗봇** 탭은 [Wiki Guide](04-agent-spec.md)(읽기 전용)를 브라우저에서 쓴다. 백엔드 없이 동작:
+사이트의 **챗봇** 탭은 [Wiki Guide](04-agent-spec.md)(읽기 전용)를 브라우저에서 쓴다. **API 키를 쓰지 않는다** — 대신 로컬 브리지가 이미 로그인된 `claude` CLI(구독)를 재사용한다.
 
-1. 질문 입력 → 로드된 위키 페이지에서 키워드로 관련 페이지 top-4 검색(client-side).
-2. 그 페이지들을 context로 묶어 system 프롬프트(위키 근거로만 답, 없으면 "위키에 없음")와 함께 LLM API에 전송.
-3. 답 + 근거 페이지 링크 표시(클릭 시 페이지 뷰로 이동).
+흐름:
+1. 브라우저 챗봇 → 로컬 브리지(`serve/guide_bridge.py`, 기본 `http://localhost:8765`)로 질문 POST.
+2. 브리지가 `wiki/`에서 관련 페이지 top-4 검색 → context로 묶어 **`claude -p`**(구독, 무키)로 답 생성.
+3. 브리지가 `{answer, cites}` 반환 → 챗봇이 답 + 근거 페이지 링크 표시.
 
-**에이전트(provider)는 교체 가능.** 어댑터: `anthropic`(Claude), `openai`(OpenAI 및 호환 엔드포인트 — Ollama·groq 등 `endpoint`로). 추가 provider는 `serve/template.html`의 `callProvider`에 분기 추가.
+**실행:**
+```bash
+cd mcp-wiki
+WIKI_ROOT=<레포 루트> python serve/guide_bridge.py   # :8765 대기 (claude CLI 로그인 필요)
+```
+- 다른 로컬 모델을 쓰려면 `CLAUDE_BIN` 환경변수로 교체(예: `ollama` 래퍼). provider별 API 키 불필요.
+- 브리지 URL은 사이트 ⚙ 설정 또는 `serve/guide-config.js`(로컬, gitignore)로 변경. 레포는 `guide-config.example.js`만 배포.
 
-**설정 위치:**
-- `serve/agent-config.js` — provider/model/endpoint 프리셋. **로컬 전용, gitignore**(레포에 안 올라감). 없으면 빌드가 공란 `agent-config.example.js`를 복사.
-- 레포는 `agent-config.example.js`를 **공란으로** 배포 → clone 후 본인이 설정:
-  ```bash
-  cd mcp-wiki/serve && cp agent-config.example.js agent-config.js   # provider/model 채움
-  ```
-- **API 키**: 파일에 두지 않는다. 사이트 ⚙ 설정에서 입력 → 브라우저 `localStorage`에만 저장.
+**MCP/스킬 경로 (브리지 없이):** 브라우저 챗봇 대신 Claude(Desktop/Code)에서 **`/wiki-guide` 스킬**을 쓰면 위키 MCP tool로 같은 read-only Q&A를 한다 — 서버·키 모두 불필요. [skills/wiki-guide](skills/wiki-guide/SKILL.md).
 
-> ⚠ 보안: 정적 사이트라 브라우저가 LLM API를 **직접 호출**한다 → API 키가 클라이언트에 노출된다. 개인/로컬 용도 전제. 공개 배포(예: GitHub Pages)에 키 넣지 마라. 다중 사용자·키 은닉이 필요하면 별도 백엔드 프록시를 둬야 한다([06 접근 계획 Stack B](06-access-plan.md)).
+> 키가 없으므로 공개 배포(GitHub Pages 등)에 노출될 비밀이 없다. 단 브리지는 **로컬 전용**(localhost) — 같은 머신에서 claude CLI로 답을 만든다. 원격 다중 사용자용으로 열려면 인증·레이트리밋을 갖춘 서버로 감싸야 한다([06 Stack B](06-access-plan.md)).
 
 ## 5. 저장 구조
 
