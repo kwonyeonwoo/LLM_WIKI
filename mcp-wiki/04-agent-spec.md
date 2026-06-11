@@ -1,7 +1,8 @@
 ---
 title: 에이전트 사양 — Wiki Keeper / Wiki Guide
-status: draft
+status: active
 date: 2026-06-06
+updated: 2026-06-11
 tags: [agent-spec, permissions, roles, mcp-wiki, governance]
 description: MCP 기반 CV/Physical AI wiki를 편집하거나 질의응답하는 두 에이전트(Wiki Keeper 편집자, Wiki Guide 챗봇)의 역할, 권한, 허용 기능, 가드레일, 에스컬레이션을 정의하는 사양 문서.
 type: agent-spec
@@ -9,15 +10,17 @@ type: agent-spec
 
 # 에이전트 사양: Wiki Keeper / Wiki Guide
 
-Status: draft
+Status: active ([Round 7](02-decision-rounds.md)에서 2역할 분리 확정)
 관련 문서: [PRD](03-prd.md) · [README](README.md) · [하네스 & 스킬](05-harness-and-skills.md) · [운영 규칙](../AGENTS.md)
 
 이 위키를 다루는 에이전트는 **두 역할**로 나뉜다. 권한을 분리해 "읽기만 하면 되는 작업"이 쓰기 권한을 갖지 않게 한다(최소 권한 원칙).
 
-| 에이전트 | 역할 | 쓰기 권한 |
-|---|---|---|
-| **Wiki Guide** | 질의응답 챗봇 (read-only) | 없음 |
-| **Wiki Keeper** | 편집·ingest·유지보수 | 있음 |
+| 에이전트 | 역할 | 허용 tool | 쓰기 권한 | 삭제 |
+|---|---|---|---|---|
+| **Wiki Guide** | 질의응답 챗봇 (read-only) | `search_wiki`, `read_page`, `list_pages` | 없음 | 없음 |
+| **Wiki Keeper** | 편집·ingest·유지보수 | 6 tool 전체 (read 3 + `create_page`, `update_page`, `link_check`) | `wiki/` 내부만 | 없음 (사람이 git) |
+
+요약: **Guide = 읽고 답한다, Keeper = 쓰고 점검한다.** 둘 다 페이지 삭제 권한은 없음(사람 승인 사항). 상세는 아래 각 절.
 
 ---
 

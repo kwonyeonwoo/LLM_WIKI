@@ -1,7 +1,8 @@
 ---
 title: 하네스 & 스킬 — 재사용 가능한 실행 구조
-status: draft
+status: active
 date: 2026-06-06
+updated: 2026-06-11
 tags: [harness, skill, mcp-wiki, reusable, serving]
 description: MCP wiki tool 구현과 LLM wiki 페이지 서빙을 재사용 가능하게 묶는 하네스(계약·절차·도구·저널·서빙 계층)와 Claude 스킬(wiki-keeper) 카탈로그를 정리한 문서.
 type: harness-spec
@@ -9,7 +10,7 @@ type: harness-spec
 
 # 하네스 & 스킬: 재사용 가능한 실행 구조
 
-Status: draft
+Status: active (하네스 5계층 + wiki-keeper 스킬 구현됨)
 관련 문서: [에이전트 사양](04-agent-spec.md) · [README](README.md) · [PRD](03-prd.md) · [운영 규칙](../AGENTS.md)
 
 **하네스(harness)** = 에이전트가 매번 즉흥적으로 일하지 않도록 감싸는 재사용 실행 구조. **스킬(skill)** = 그 하네스를 한 번에 호출하는 진입점. 도메인이 바뀌어도(CV/Physical AI → 다른 주제) 그대로 재사용된다 — 도메인은 데이터(markdown)일 뿐, 실행 구조는 불변.

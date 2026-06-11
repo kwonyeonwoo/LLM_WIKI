@@ -1,7 +1,8 @@
 ---
 title: 의사결정 라운드 기록 (Agent Decision Log)
-status: draft
+status: active
 date: 2026-06-06
+updated: 2026-06-11
 tags: [decision-log, mcp-wiki, architecture, agent-rounds]
 description: markdown-only LLM Wiki를 MCP 기반 wiki tool로 전환하기까지 사용자와 agent가 거친 의사결정 라운드를 스택, 저장 백엔드, tool 표면, 도메인 전환, 무결성 책임 순으로 기록한 결정 로그.
 type: decision-log
@@ -9,7 +10,7 @@ type: decision-log
 
 # 의사결정 라운드 기록 (Agent Decision Log)
 
-Status: draft
+Status: active (Round 0~7, append 중)
 형식: 라운드별 [질문 → 옵션 → tradeoff → 결정 → 근거]
 관련 문서: [지식 도메인](01-knowledge-domain.md) · [PRD](03-prd.md) · [README](README.md)
 
@@ -87,7 +88,9 @@ Status: draft
 
 **결정. 컴퓨터비전 / 피지컬 AI로 전환.** 상세는 [01-knowledge-domain.md](01-knowledge-domain.md).
 
-근거: 사용자 요구. 기존 운영 메커니즘(AGENTS.md)은 도메인 독립적이므로 그대로 재사용, 콘텐츠 축만 교체. 기존 ACB 페이지는 archive로 보존(삭제 안 함).
+근거: 사용자 요구. 기존 운영 메커니즘(AGENTS.md)은 도메인 독립적이므로 그대로 재사용, 콘텐츠 축만 교체.
+
+**번복 기록(2026-06-11).** 최초엔 ACB 페이지를 archive로 보존하려 했으나, 사용자 지시("지식도메인 내용으로 채워줘 + 검증출처만")에 따라 ACB 도메인 콘텐츠 20개를 `git rm`으로 삭제하고 CV/Physical AI 콘텐츠로 교체. 운영 메커니즘 메타 페이지(llm-wiki, rag-vs-llm-wiki, markdown-only-constraint 등)는 보존. → "보존"이 아니라 "교체(삭제)"가 실제 결정.
 
 ---
 
@@ -106,13 +109,67 @@ Status: draft
 
 ---
 
+## Round 6 — 시각화 / 서빙 방식 (2026-06-11)
+
+**질문.** wiki page를 어떻게 시각화·서빙하나? MCP tool은 데이터/로직 계층이고, 사람이 보는 표현 계층이 별도로 필요.
+
+| 옵션 | 장점 | 단점 |
+|---|---|---|
+| A. 정적 사이트 (빌드 시 markdown→HTML+JSON) | 의존성 0, GitHub Pages 배포, 빌드가 파서 로직 실증 | 실시간 편집 인터랙션 약함 |
+| B. 동적 웹앱 (서버 렌더 + 편집 UI) | 편집·검색 인터랙션 강함 | 런타임 서버 필요, 복잡 |
+
+**결정. A 먼저 구현, 필요 시 B 이어서.**
+
+근거: MCP 서버 = 데이터/로직, 웹앱 = 표현. 둘이 같은 markdown(source of truth) 공유. 정적 사이트는 stdlib만으로 그래프(노드=페이지, 엣지=Related)·페이지·검색 제공 → markdown-only 철학과 일치, 배포 단순. 산출: `serve/build_site.py` + `template.html` → `site/data.json`+`index.html`. 클라이언트는 CDN d3+marked.
+
+---
+
+## Round 7 — 에이전트 역할 분리 (2026-06-11)
+
+**질문.** 위키를 다루는 에이전트를 단일로 둘지, 권한별로 나눌지?
+
+**결정. 두 역할로 분리** — Wiki Guide(read-only 챗봇), Wiki Keeper(편집·ingest). 상세 [04-agent-spec.md](04-agent-spec.md).
+
+근거: 최소 권한 원칙. 질의응답은 write tool이 필요 없음 → read-only allowlist로 사고 차단. 현재 서버는 단일 프로세스 6 tool 제공, 역할 강제는 클라이언트 정책 또는 추후 `--read-only` 플래그.
+
+---
+
+## Round 8 — 사용자 접근 표면: 열람 / 학습 / 활용 (2026-06-11)
+
+**질문.** 사용자가 위키 자료를 열람·학습·활용하려면 어떤 방식으로 구현하나? 세 모드를 한 UI에 다 넣나, 표면을 나누나?
+
+**핵심 관찰.** 세 모드는 요구가 다름:
+- 열람(browse) = "뭐가 있나" 훑기·관계 보기 → 시각화가 답.
+- 학습(learn) = 개념 설명·읽는 순서·꼬리질문 → 대화형.
+- 활용(apply) = 작업 중 지식 인용·새 지식 저장 → 대화형 + 쓰기.
+
+학습·활용의 대화 엔진(Claude)과 지식 접근(MCP tool)은 **이미 존재**. 그래프 UI에 채팅·추론을 새로 박는 건 중복 투자.
+
+| 옵션 | 설명 | 평가 |
+|---|---|---|
+| A. 단일 커스텀 웹앱에 열람+편집+채팅 전부 | 통합 UX | 과설계. 대화 엔진 재구현 = 낭비 |
+| B. 표면 2분할 — 정적 사이트(열람) + Claude+MCP(학습·활용) | 기존 자산 재사용, 코드 최소 | 채택 |
+
+**결정. B — 표면 2분할.** 우선순위:
+1. **P1** Wiki Guide(MCP read-only) Claude Desktop 연결 — 설정만, 코드 0. 학습·활용 즉시 가능.
+2. **P2** 정적 사이트 학습 보강 — maturity 필터, Evidence/출처 패널, 검색→그래프 하이라이트.
+3. **P3** 브라우저 편집(Stack B) — 보류. 편집은 Keeper로 충분.
+4. **병행** 콘텐츠 보강 — 현재 meta:11 vs 실지식:7 쏠림. 표면보다 읽을거리 확보가 선결.
+
+근거: 최소 추가 코드로 세 모드 모두 커버. 대화형(학습·활용)은 Claude+MCP에 위임, 시각화(열람)만 정적 사이트가 담당. 상세 단계 계획 [06-access-plan.md](06-access-plan.md).
+
+---
+
 ## 현재까지 합의 요약
 
 - 스택: Python + 공식 MCP SDK
 - 저장: markdown 파일 = source of truth, 인덱스는 파생 캐시
 - Tool MVP 6종: search/read/list + create/update + link_check
-- 도메인: CV / Physical AI (intersection 우선)
+- 도메인: CV / Physical AI (intersection 우선), ACB 콘텐츠는 삭제·교체
 - index·링크 무결성: tool이 자동 강제
+- 시각화: 정적 사이트(Stack A) 구현, 동적 웹앱(Stack B) 보류
+- 에이전트: Wiki Guide(read) / Wiki Keeper(write) 2역할 분리
+- 접근 표면: 2분할 — 정적 사이트(열람) + Claude+MCP(학습·활용). P1 Guide 연결 우선 ([Round 8](#round-8--사용자-접근-표면-열람--학습--활용-2026-06-11))
 
 ## Open Questions (다음 라운드 후보)
 

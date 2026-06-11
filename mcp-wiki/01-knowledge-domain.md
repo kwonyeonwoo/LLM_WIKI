@@ -1,7 +1,8 @@
 ---
 title: 지식 도메인 정의 — 컴퓨터비전 / 피지컬 AI
-status: draft
+status: active
 date: 2026-06-06
+updated: 2026-06-11
 tags: [computer-vision, physical-ai, knowledge-domain, mcp-wiki, scope]
 description: MCP 기반 wiki tool이 다룰 지식 도메인을 컴퓨터비전과 피지컬 AI 두 축, 그리고 둘의 교집합(embodied perception)으로 정의하고 포함/제외 범위와 페이지 분류 체계를 명시하는 설계 문서.
 domain: cv, physical-ai
@@ -10,7 +11,7 @@ type: design-doc
 
 # 지식 도메인 정의: 컴퓨터비전 / 피지컬 AI
 
-Status: draft
+Status: active (구현 완료, 갱신 중)
 Owner: 사용자 + LLM agent
 관련 문서: [PRD](03-prd.md) · [의사결정 라운드](02-decision-rounds.md) · [README](README.md)
 
