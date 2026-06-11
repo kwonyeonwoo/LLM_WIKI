@@ -137,21 +137,23 @@ python -m mcp_wiki.server         # stdio transport로 대기
 
 ### 4.3 MCP 클라이언트 등록 (Claude Desktop 예)
 
-클라이언트 설정 파일에 서버 등록:
+설정 파일(`%APPDATA%/Claude/claude_desktop_config.json`)의 `mcpServers`에 등록:
 ```json
 {
   "mcpServers": {
     "cv-physical-ai-wiki": {
-      "command": "python",
+      "command": "C:\\Users\\yeony\\AppData\\Local\\Programs\\Python\\Python310\\python.exe",
       "args": ["-m", "mcp_wiki.server"],
       "env": {
-        "WIKI_ROOT": "C:/Users/yeony/Documents/LLM wiki"
+        "WIKI_ROOT": "C:\\Users\\yeony\\Documents\\LLM wiki"
       }
     }
   }
 }
 ```
+- `command`: 패키지(`pip install -e .`)가 설치된 python의 **절대 경로**. PATH의 `python`이 해당 인터프리터로 확실히 잡히면 `"python"`도 가능하나, GUI 클라이언트는 PATH가 달라질 수 있어 절대 경로 권장.
 - `WIKI_ROOT`: 위키 markdown 파일들의 루트. tool은 이 경로 기준으로 읽고 쓴다.
+- 등록 후 **Claude Desktop을 재시작**해야 서버가 로드된다.
 
 ### 4.4 검증
 - 클라이언트에서 6개 tool이 노출되는지 확인.

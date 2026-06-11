@@ -22,7 +22,7 @@
 - ViT: 이미지를 패치 시퀀스로 보고 transformer 적용. CNN 없이도 대규모 학습 시 SOTA.
 - CLIP: 4억(400M) 이미지-캡션 쌍을 contrastive 학습으로 공유 임베딩 정렬 → zero-shot 분류.
 - DINOv2: 자기지도 학습으로 1.42억(142M) 큐레이션 이미지 학습 → 라벨 없이 전이성 높은 feature. 최소 fine-tuning으로 광범위 태스크 대응.
-- MAE: 입력 패치 ~70%를 마스킹 후 복원 학습 → ViT용 효율적 자기지도.
+- MAE: 입력 패치 75%를 마스킹 후 복원 학습 → ViT용 효율적 자기지도.
 
 ## Useful Details
 

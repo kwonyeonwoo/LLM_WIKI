@@ -14,6 +14,7 @@ VLA(Vision-Language-Action) 모델은 vision foundation model + LLM/VLM 위에 *
 - **π0**: PaliGemma VLM에 action expert를 붙여 flow matching으로 연속 행동 생성 → 정밀·유연한 manipulation.
 - **행동 표현 두 갈래**: (1) 토큰 양자화(RT-2, OpenVLA), (2) 연속 생성(diffusion/flow matching, π0).
 - **CV 의존**: vision foundation model(CLIP 류) 사전학습 지식이 미본 객체·지시 일반화에 기여.
+- **최신(2024~) 3축**: (1) open-world 일반화(π0.5), (2) 비디오·웹지식 결합(GR-2), (3) 추론 효율화 — VLA가 커지며 실시간 제어 병목 해소가 핵심 과제([Efficient VLA survey](https://arxiv.org/abs/2510.24795)).
 
 ## Evidence
 
@@ -21,6 +22,7 @@ VLA(Vision-Language-Action) 모델은 vision foundation model + LLM/VLM 위에 *
 - RT-2 — https://arxiv.org/abs/2307.15818
 - OpenVLA — https://arxiv.org/abs/2406.09246
 - π0 — https://arxiv.org/abs/2410.24164
+- Efficient VLA Models (survey) — https://arxiv.org/abs/2510.24795
 
 ## Conflicts / Open Questions
 

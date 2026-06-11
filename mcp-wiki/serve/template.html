@@ -36,6 +36,8 @@
 <div id="sidebar">
   <strong>지식 도메인</strong>
   <div class="filter-row" id="domainFilters"></div>
+  <strong style="display:block;margin-top:12px;">성숙도 (maturity)</strong>
+  <div class="filter-row" id="maturityFilters"></div>
   <div id="nav"></div>
 </div>
 <div id="main">
@@ -51,7 +53,9 @@
 </div>
 <script>
 const COLORS = {cv:"#2563eb","physical-ai":"#16a34a",intersection:"#db2777",meta:"#6b7280"};
-let DATA, byId, activeDomains = new Set();
+const MAT_COLORS = {established:"#15803d",emerging:"#b45309",speculative:"#7c3aed","(none)":"#9ca3af"};
+const matKey = n => n.maturity || "(none)";
+let DATA, byId, activeDomains = new Set(), activeMaturities = new Set(), searchQuery = "";
 
 fetch("data.json").then(r=>r.json()).then(d=>{ DATA=d; init(); });
 
@@ -63,8 +67,17 @@ function init(){
   domains.forEach(dm=>{
     const l = df.append("label");
     l.append("input").attr("type","checkbox").property("checked",true)
-      .on("change",function(){ this.checked?activeDomains.add(dm):activeDomains.delete(dm); renderNav(); drawGraph(); });
+      .on("change",function(){ this.checked?activeDomains.add(dm):activeDomains.delete(dm); renderNav(searchQuery); drawGraph(); });
     l.append("span").attr("class","badge").style("background",COLORS[dm]||"#999").text(dm);
+  });
+  const maturities = [...new Set(DATA.nodes.map(matKey))].sort();
+  activeMaturities = new Set(maturities);
+  const mf = d3.select("#maturityFilters");
+  maturities.forEach(mt=>{
+    const l = mf.append("label");
+    l.append("input").attr("type","checkbox").property("checked",true)
+      .on("change",function(){ this.checked?activeMaturities.add(mt):activeMaturities.delete(mt); renderNav(searchQuery); drawGraph(); });
+    l.append("span").attr("class","badge").style("background",MAT_COLORS[mt]||"#999").text(mt);
   });
   renderNav(); drawGraph();
   d3.select("#search").on("input", function(){ filterSearch(this.value.toLowerCase()); });
@@ -82,7 +95,7 @@ function show(v){
 function renderNav(filter){
   const nav = d3.select("#nav"); nav.html("");
   const groups = {};
-  DATA.nodes.filter(n=>activeDomains.has(n.domain))
+  DATA.nodes.filter(n=>activeDomains.has(n.domain) && activeMaturities.has(matKey(n)))
     .filter(n=>!filter || n.title.toLowerCase().includes(filter) || n.markdown.toLowerCase().includes(filter))
     .forEach(n=>{ (groups[n.domain]=groups[n.domain]||[]).push(n); });
   Object.keys(groups).sort().forEach(dm=>{
@@ -93,7 +106,16 @@ function renderNav(filter){
   });
 }
 
-function filterSearch(q){ renderNav(q); }
+function filterSearch(q){ searchQuery = q; renderNav(q); highlightGraph(q); }
+
+function highlightGraph(q){
+  const g = d3.select("#graph");
+  g.selectAll(".node").each(function(d){
+    const hit = !q || d.title.toLowerCase().includes(q) || (d.markdown||"").toLowerCase().includes(q);
+    d3.select(this).style("opacity", hit?1:0.15);
+  });
+  g.selectAll(".link").style("opacity", q?0.1:1);
+}
 
 function openPage(id){
   const n = byId[id]; if(!n) return;
@@ -129,7 +151,7 @@ function resolveRel(fromId, href){
 function drawGraph(){
   const svg = d3.select("#graph"); svg.selectAll("*").remove();
   const w = svg.node().clientWidth, h = svg.node().clientHeight;
-  const nodes = DATA.nodes.filter(n=>activeDomains.has(n.domain)).map(n=>({...n}));
+  const nodes = DATA.nodes.filter(n=>activeDomains.has(n.domain) && activeMaturities.has(matKey(n))).map(n=>({...n}));
   const ok = new Set(nodes.map(n=>n.id));
   const links = DATA.edges.filter(e=>ok.has(e.source)&&ok.has(e.target)).map(e=>({...e}));
   const deg = {}; links.forEach(l=>{deg[l.source]=(deg[l.source]||0)+1;deg[l.target]=(deg[l.target]||0)+1;});
@@ -149,6 +171,7 @@ function drawGraph(){
     link.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
     node.attr("transform",d=>`translate(${d.x},${d.y})`);
   });
+  if(searchQuery) highlightGraph(searchQuery);
 }
 window.addEventListener("resize",()=>{ if(d3.select("#graph").style("display")!=="none") drawGraph(); });
 </script>

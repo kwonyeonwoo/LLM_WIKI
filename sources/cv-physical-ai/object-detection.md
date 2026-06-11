@@ -13,6 +13,9 @@
   - Faster R-CNN: https://arxiv.org/abs/1506.01497
   - YOLO: https://arxiv.org/abs/1506.02640
   - DETR (End-to-End Object Detection with Transformers): https://arxiv.org/abs/2005.12872
+  - RT-DETR (DETRs Beat YOLOs on Real-time Object Detection, CVPR 2024): https://arxiv.org/abs/2304.08069
+  - YOLOv10 (Real-Time End-to-End Object Detection): https://arxiv.org/abs/2405.14458
+  - YOLO 10년 리뷰: https://arxiv.org/abs/2406.19407
 
 ## Summary
 
@@ -31,9 +34,16 @@ Object detection = 이미지 내 객체의 클래스 + 위치(bbox)를 동시에
 - One-stage 대표: YOLO 계열, RetinaNet(Focal Loss로 class imbalance 완화).
 - DETR: bipartite matching loss + transformer encoder-decoder.
 
+## Recent Developments (2023–2025)
+
+- **RT-DETR** (arXiv:2304.08069, CVPR 2024): 최초의 실시간 end-to-end DETR. NMS 제거하고도 YOLO보다 빠르고 정확 → "실시간 검출 = YOLO" 의존을 깸. one-stage와 transformer 검출의 경계가 흐려지는 변곡점.
+- **YOLOv10** (arXiv:2405.14458): consistent dual assignments로 **NMS-free end-to-end 학습**. YOLOv10-S가 RT-DETR-R18 대비 유사 AP에서 1.8× 빠르고 파라미터·FLOPs 2.8× 작음. → YOLO 계열도 NMS를 버리는 방향.
+- **YOLOv11**: 아키텍처 계층·neck 연결 개선으로 연속 진화.
+- **수렴 흐름**: one-stage(YOLO)와 set-prediction(DETR)이 모두 **NMS-free end-to-end**로 수렴 중. 옛 "two-stage가 더 정확 / one-stage가 더 빠름" 이분법이 약화.
+
 ## Limits And Risks
 
-- Survey는 2019~2021 시점 → 이후 RT-DETR, YOLO 최신 버전 등 미반영.
+- 기반 survey는 2019~2021 시점 → 위 Recent Developments로 보강했으나 추가 후속(RT-DETRv2/v4 등) 검증 필요.
 - arxiv abs는 동료심사 전 버전 가능 → 출판본과 수치 차이 가능.
 
 ## Related Wiki Pages

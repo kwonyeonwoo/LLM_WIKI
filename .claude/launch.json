@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "wiki-site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "-d", "mcp-wiki/site", "8001"],
+      "port": 8001
+    }
+  ]
+}
