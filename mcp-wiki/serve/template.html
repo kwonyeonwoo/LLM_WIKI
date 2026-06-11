@@ -6,10 +6,9 @@
 <title>CV / Physical AI LLM Wiki</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<!-- Agent provider preset (provider/model/endpoint, NEVER an API key).
-     Local copy may set Claude; the committed repo ships agent-config.example.js blank.
-     build_site.py copies agent-config.js into site/ (falls back to the blank example). -->
-<script src="agent-config.js"></script>
+<!-- Optional bridge URL override (no API key anywhere). build_site copies
+     guide-config.js if present, else the blank example. Default: localhost:8765. -->
+<script src="guide-config.js"></script>
 <style>
   :root { --cv:#2563eb; --physical-ai:#16a34a; --intersection:#db2777; --meta:#6b7280; }
   * { box-sizing: border-box; }
@@ -73,18 +72,10 @@
     <div id="page"></div>
     <div id="chat">
       <div id="chatSettings" class="hidden">
-        <label>에이전트
-          <select id="cfgProvider">
-            <option value="">(선택)</option>
-            <option value="anthropic">Anthropic (Claude)</option>
-            <option value="openai">OpenAI 호환</option>
-          </select>
-        </label>
-        <label>모델 <input id="cfgModel" size="22" placeholder="예: claude-sonnet-4-6" /></label>
-        <label>API 키 <input id="cfgKey" type="password" size="20" placeholder="이 브라우저에만 저장" /></label>
-        <label>엔드포인트 <input id="cfgEndpoint" size="24" placeholder="(OpenAI 호환 시 base URL)" /></label>
+        <label>가이드 브리지 URL <input id="cfgBridge" size="26" placeholder="http://localhost:8765" /></label>
         <button id="cfgSave">저장</button>
-        <div class="chat-warn">키는 localStorage에만 저장됨(레포에 안 올라감). 브라우저 직접 호출이라 키가 클라이언트에 노출됨 — 개인/로컬 용도로만.</div>
+        <div class="chat-warn">API 키 없음. 로컬 브리지(<code>claude -p</code>, 구독 재사용)가 답을 만든다. 브리지 실행:
+          <code>cd mcp-wiki &amp;&amp; python serve/guide_bridge.py</code>. 또는 Claude에서 <code>/wiki-guide</code> 사용.</div>
       </div>
       <div id="chatLog"></div>
       <div id="chatBar">
@@ -221,87 +212,33 @@ function drawGraph(){
   });
   if(searchQuery) highlightGraph(searchQuery);
 }
-// ---- Chatbot (Wiki Guide: read-only, answers from loaded wiki pages) ----
-const LS = "llmwiki.agent";
-let chatHistory = [];
+// ---- Chatbot (Wiki Guide: read-only, no API key — local bridge backend) ----
+const LS = "llmwiki.bridge";
 
-function agentCfg(){
-  const base = Object.assign({provider:"", model:"", endpoint:""}, window.AGENT_CONFIG||{});
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(LS)||"{}"); } catch(e){}
-  return Object.assign(base, saved);   // localStorage(사용자 설정·키)가 파일 프리셋을 덮어씀
+function bridgeUrl(){
+  const saved = (localStorage.getItem(LS)||"").trim();
+  return saved || (window.GUIDE_CONFIG && window.GUIDE_CONFIG.bridge) || "http://localhost:8765";
 }
 
 function initChat(){
-  const c = agentCfg();
-  d3.select("#cfgProvider").property("value", c.provider||"");
-  d3.select("#cfgModel").property("value", c.model||"");
-  d3.select("#cfgKey").property("value", c.key||"");
-  d3.select("#cfgEndpoint").property("value", c.endpoint||"");
+  d3.select("#cfgBridge").property("value", bridgeUrl());
   d3.select("#cfgSave").on("click", saveCfg);
-  d3.select("#chatGear").on("click", ()=>{ const s=document.getElementById("chatSettings"); s.classList.toggle("hidden"); });
+  d3.select("#chatGear").on("click", ()=>{ document.getElementById("chatSettings").classList.toggle("hidden"); });
   d3.select("#chatSend").on("click", sendChat);
   d3.select("#chatInput").on("keydown", function(ev){ if(ev.key==="Enter") sendChat(); });
-  // 설정 미완료면 안내 + 설정 패널 자동 노출
-  if(!c.provider || !c.key){
-    document.getElementById("chatSettings").classList.remove("hidden");
-    addMsg("system", "에이전트가 아직 설정되지 않았다. ⚙ 설정에서 **에이전트(provider)·모델·API 키**를 입력해라. (이 레포는 provider 공란으로 배포됨 — clone 후 본인 것으로 설정.)");
-  }
+  // 브리지 살아있는지 health check
+  fetch(bridgeUrl(), {method:"GET"}).then(r=>r.ok?r.json():Promise.reject())
+    .then(()=> addMsg("system","가이드 브리지 연결됨 (API 키 없음, 로컬 claude 구독 사용). 위키에 대해 물어봐라."))
+    .catch(()=>{
+      document.getElementById("chatSettings").classList.remove("hidden");
+      addMsg("system","가이드 브리지가 꺼져있다. 터미널에서 `cd mcp-wiki && python serve/guide_bridge.py` 실행하거나, Claude에서 `/wiki-guide`를 써라. (API 키 불필요)");
+    });
 }
 
 function saveCfg(){
-  const cfg = {
-    provider: document.getElementById("cfgProvider").value.trim(),
-    model: document.getElementById("cfgModel").value.trim(),
-    key: document.getElementById("cfgKey").value.trim(),
-    endpoint: document.getElementById("cfgEndpoint").value.trim(),
-  };
-  localStorage.setItem(LS, JSON.stringify(cfg));
+  localStorage.setItem(LS, document.getElementById("cfgBridge").value.trim());
   document.getElementById("chatSettings").classList.add("hidden");
-  addMsg("system", "설정 저장됨 (이 브라우저 localStorage). 이제 질문해라.");
-}
-
-function retrieve(q, k){
-  const terms = q.toLowerCase().split(/\s+/).filter(t=>t.length>1);
-  return DATA.nodes.map(n=>{
-    const title=n.title.toLowerCase(), body=(n.markdown||"").toLowerCase();
-    let s=0; terms.forEach(t=>{ if(title.includes(t)) s+=3; if(body.includes(t)) s+=1; });
-    return {n,s};
-  }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s).slice(0,k||4).map(x=>x.n);
-}
-
-function buildContext(pages){
-  return pages.map(p=>`# ${p.title}  (id: ${p.id})\n${(p.markdown||"").slice(0,1800)}`).join("\n\n---\n\n");
-}
-
-const SYS = "너는 이 LLM Wiki의 Wiki Guide다. 아래 제공된 위키 페이지 내용만 근거로 한국어로 답한다. 위키에 없으면 '위키에 없음'이라고 명시한다. 추측을 사실처럼 단정하지 않는다. 답 끝에 근거로 쓴 페이지 제목을 적는다.";
-
-async function callProvider(cfg, question, context){
-  const userMsg = `질문: ${question}\n\n참고 위키 페이지:\n\n${context||"(관련 페이지 없음)"}`;
-  if(cfg.provider==="anthropic"){
-    const r = await fetch((cfg.endpoint||"https://api.anthropic.com")+"/v1/messages",{
-      method:"POST",
-      headers:{ "content-type":"application/json", "x-api-key":cfg.key,
-        "anthropic-version":"2023-06-01", "anthropic-dangerous-direct-browser-access":"true" },
-      body: JSON.stringify({ model:cfg.model||"claude-sonnet-4-6", max_tokens:1024, system:SYS,
-        messages:[{role:"user",content:userMsg}] })
-    });
-    const j = await r.json();
-    if(!r.ok) throw new Error(j.error?.message || JSON.stringify(j));
-    return j.content.map(b=>b.text||"").join("");
-  }
-  if(cfg.provider==="openai"){
-    const r = await fetch((cfg.endpoint||"https://api.openai.com")+"/v1/chat/completions",{
-      method:"POST",
-      headers:{ "content-type":"application/json", "authorization":"Bearer "+cfg.key },
-      body: JSON.stringify({ model:cfg.model||"gpt-4o-mini",
-        messages:[{role:"system",content:SYS},{role:"user",content:userMsg}] })
-    });
-    const j = await r.json();
-    if(!r.ok) throw new Error(j.error?.message || JSON.stringify(j));
-    return j.choices[0].message.content;
-  }
-  throw new Error("지원하지 않는 provider: '"+cfg.provider+"'. ⚙ 설정에서 anthropic 또는 openai 선택.");
+  addMsg("system","브리지 URL 저장됨.");
 }
 
 function addMsg(who, markdown, cites){
@@ -314,7 +251,8 @@ function addMsg(who, markdown, cites){
     const c = document.createElement("div"); c.className="cites";
     c.append("근거: ");
     cites.forEach((p,i)=>{ const a=document.createElement("a"); a.textContent=p.title;
-      a.onclick=()=>openPage(p.id); c.appendChild(a); if(i<cites.length-1) c.append(" · "); });
+      const pid=p.path||p.id; a.onclick=()=>{ if(byId[pid]) openPage(pid); };
+      c.appendChild(a); if(i<cites.length-1) c.append(" · "); });
     wrap.querySelector(".bubble").appendChild(c);
   }
   log.appendChild(wrap); log.scrollTop = log.scrollHeight;
@@ -324,22 +262,21 @@ function addMsg(who, markdown, cites){
 async function sendChat(){
   const input = document.getElementById("chatInput");
   const q = input.value.trim(); if(!q) return;
-  const cfg = agentCfg();
-  if(!cfg.provider || !cfg.key){
-    document.getElementById("chatSettings").classList.remove("hidden");
-    addMsg("system","먼저 ⚙ 설정에서 에이전트와 API 키를 입력해라."); return;
-  }
   input.value="";
   addMsg("user", q);
-  const pages = retrieve(q, 4);
-  const thinking = addMsg("bot", "_생각 중..._");
+  const thinking = addMsg("bot", "_생각 중... (로컬 claude 호출, 수 초 걸릴 수 있음)_");
   try {
-    const ans = await callProvider(cfg, q, buildContext(pages));
+    const r = await fetch(bridgeUrl().replace(/\/$/,"")+"/ask", {
+      method:"POST", headers:{"content-type":"application/json"},
+      body: JSON.stringify({question:q})
+    });
+    const j = await r.json();
     thinking.remove();
-    addMsg("bot", ans, pages);
+    if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
+    addMsg("bot", j.answer||"(빈 응답)", j.cites||[]);
   } catch(e){
     thinking.remove();
-    addMsg("system", "호출 실패: " + e.message);
+    addMsg("system", "브리지 호출 실패: " + e.message + " — 브리지 실행 여부 확인(`python serve/guide_bridge.py`) 또는 `/wiki-guide` 사용.");
   }
 }
 

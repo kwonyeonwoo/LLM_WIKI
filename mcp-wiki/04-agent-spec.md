@@ -100,7 +100,7 @@ MCP 클라이언트가 어떤 tool을 노출하느냐로 역할을 강제한다.
 
 ### Wiki Guide의 또 다른 표면 — 사이트 챗봇
 
-정적 사이트(`serve/`)의 **챗봇** 탭이 Wiki Guide를 브라우저에서 구현한다. 백엔드가 없어 **구조적으로 read-only**다 — 파일을 쓸 수단 자체가 없고, 로드된 위키 페이지를 검색해 context로 넣어 답할 뿐이다. provider(에이전트)는 사용자가 고른다(anthropic/openai 등). 설정·키 취급은 [README §4.6](README.md). 즉 Guide는 두 경로로 쓸 수 있다: (1) MCP 클라이언트(Claude Desktop)의 read tool, (2) 사이트 챗봇.
+정적 사이트(`serve/`)의 **챗봇** 탭이 Wiki Guide를 브라우저에서 구현한다. **read-only**다 — 파일을 쓸 수단이 없고, 위키를 검색해 context로 넣어 답할 뿐이다. **API 키를 쓰지 않는다**: 로컬 브리지(`serve/guide_bridge.py`)가 `claude -p`(로그인된 구독, 무키)로 답을 만든다. 설정은 [README §4.6](README.md). 즉 Guide는 세 경로로 쓸 수 있다: (1) MCP 클라이언트(Claude Desktop)의 read tool, (2) `/wiki-guide` 스킬, (3) 사이트 챗봇(로컬 브리지). 모두 키 불필요.
 
 ## 5. Conflicts / Open Questions
 

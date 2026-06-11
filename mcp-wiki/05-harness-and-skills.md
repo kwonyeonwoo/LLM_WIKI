@@ -47,8 +47,10 @@ Status: active (하네스 5계층 + wiki-keeper 스킬 구현됨)
 
 설치(재사용): `skills/wiki-keeper/`를 프로젝트 `.claude/skills/`에 복사하거나 심볼릭 링크. 그러면 `/wiki-keeper`로 호출 가능.
 
+### `wiki-guide` (구현됨: `skills/wiki-guide/SKILL.md`)
+read-only Q&A 진입. 위키 MCP read tool(search/read/list)로 관련 페이지를 찾아 근거 기반으로 답하고 출처를 단다. **API 키 불필요**(현재 Claude 구독/세션 사용). 권한 분리 — 쓰기 금지([04 §1](04-agent-spec.md)). 사이트 챗봇의 로컬 브리지(`serve/guide_bridge.py`)와 같은 Guide의 두 표면.
+
 ### 향후 스킬 후보
-- `wiki-guide` — read-only 챗봇 진입(검색·읽기만). 권한 분리([04 §1](04-agent-spec.md)).
 - `wiki-ingest` — 대량 출처 일괄 ingest 전용.
 
 ## 4. 실행 요약 (재사용 체크리스트)

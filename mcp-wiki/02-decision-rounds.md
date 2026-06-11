@@ -173,6 +173,20 @@ Status: active (Round 0~7, append 중)
 
 ---
 
+## Round 10 — 챗봇 무키화 (Round 9 대체, 2026-06-11)
+
+**문제.** Round 9의 브라우저 직접 호출은 **API 키**가 필요했다(클라이언트 노출 위험). 사용자 요구: 키 없이, MCP/스킬 방식으로.
+
+**결정. 키 제거. 두 무키 경로로 재구현:**
+1. **`/wiki-guide` 스킬** — Claude(Desktop/Code)에서 위키 MCP tool로 read-only Q&A. 서버·키 0. 가장 단순.
+2. **로컬 브리지** (`serve/guide_bridge.py`) — 사이트 챗봇이 호출. 브리지가 `wiki/` 검색 후 **`claude -p`**(로그인된 구독, 무키)로 답 생성 → `{answer, cites}`. provider 어댑터·API 키 제거.
+
+근거: 키를 어디에도 두지 않음(레포·브라우저·파일 모두). 이미 로그인된 claude CLI(또는 `CLAUDE_BIN`으로 다른 로컬 모델) 재사용 = "MCP/스킬·구독" 방식. 브리지는 localhost 전용. 원격 다중 사용자는 인증 서버 필요(P3/Stack B). 상세 [README §4.6](README.md), [04 §4](04-agent-spec.md).
+
+번복: Round 9의 `agent-config.*`(provider/key) 메커니즘 삭제, `guide-config.*`(브리지 URL)로 대체.
+
+---
+
 ## 현재까지 합의 요약
 
 - 스택: Python + 공식 MCP SDK
@@ -183,7 +197,7 @@ Status: active (Round 0~7, append 중)
 - 시각화: 정적 사이트(Stack A) 구현, 동적 웹앱(Stack B) 보류
 - 에이전트: Wiki Guide(read) / Wiki Keeper(write) 2역할 분리
 - 접근 표면: 2분할 — 정적 사이트(열람) + Claude+MCP(학습·활용). P1 Guide 연결 우선 ([Round 8](#round-8--사용자-접근-표면-열람--학습--활용-2026-06-11))
-- 사이트 챗봇: provider 교체형 브라우저 내 Guide, 레포는 provider 공란 배포 ([Round 9](#round-9--사이트-챗봇-provider-교체형-2026-06-11))
+- 사이트 챗봇: **무키** — `/wiki-guide` 스킬 + 로컬 브리지(`claude -p` 구독 재사용). API 키 미사용 ([Round 10](#round-10--챗봇-무키화-round-9-대체-2026-06-11))
 
 ## Open Questions (다음 라운드 후보)
 
