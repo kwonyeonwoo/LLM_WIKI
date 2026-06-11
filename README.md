@@ -128,7 +128,7 @@ WIKI_ROOT=<레포 루트> python -m mcp_wiki.server   # 6 tool 노출
   - [hooks/pre-commit](hooks/pre-commit): 커밋 전 `link_check` 강제 git hook (설치: `git config core.hooksPath hooks`).
 - **LLM wiki** — [sources/](sources/README.md) (raw 출처) · [wiki/](wiki/overview.md) (정리된 지식) · [wiki/schema/](wiki/schema/llm-wiki-schema.md) (구조·불변조건) · [templates/](templates/page.md).
 - **시각화 도구** — [mcp-wiki/mcp_wiki/](mcp-wiki/mcp_wiki/server.py) (MCP 서버 6 tool) + [mcp-wiki/serve/](mcp-wiki/serve/build_site.py) (그래프·페이지·검색 정적 뷰어 + 사이트 챗봇).
-- **사이트 챗봇** — 뷰어 `챗봇` 탭 = 브라우저 내 Wiki Guide(읽기 전용). 위키에서 관련 페이지 찾아 LLM에 물어 답+출처. **에이전트 교체형**(anthropic/openai 등). 레포는 provider **공란** 배포 → clone 후 설정: `cp mcp-wiki/serve/agent-config.example.js mcp-wiki/serve/agent-config.js` (provider/model 편집). API 키는 사이트 ⚙ 설정 입력(localStorage, 커밋 안 됨). 상세·보안: [mcp-wiki/README §4.6](mcp-wiki/README.md).
+- **사이트 챗봇 (API 키 없음)** — 뷰어 `챗봇` 탭 = 브라우저 내 Wiki Guide(읽기 전용). **키 불필요**: 로컬 브리지([mcp-wiki/serve/guide_bridge.py](mcp-wiki/serve/guide_bridge.py))가 로그인된 `claude` CLI(구독)로 답을 만든다. 실행 `python mcp-wiki/serve/guide_bridge.py`. 브리지 없이 Claude에서 [`/wiki-guide` 스킬](mcp-wiki/skills/wiki-guide/SKILL.md)로도 가능. 상세: [mcp-wiki/README §4.6](mcp-wiki/README.md).
 - **데모** — [demo/demo.png](demo/demo.png).
 - **설계 문서** — [mcp-wiki/](mcp-wiki/README.md) 01~06 (도메인 정의 / 의사결정 / PRD / 에이전트 / 하네스 / 접근 계획).
 
