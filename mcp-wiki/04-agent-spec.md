@@ -98,6 +98,10 @@ MCP 클라이언트가 어떤 tool을 노출하느냐로 역할을 강제한다.
 
 (현재 서버는 단일 프로세스로 6 tool 모두 제공. 역할 분리는 클라이언트 정책 또는 추후 `--read-only` 플래그로 강제 — [Open Questions](#5-conflicts--open-questions).)
 
+### Wiki Guide의 또 다른 표면 — 사이트 챗봇
+
+정적 사이트(`serve/`)의 **챗봇** 탭이 Wiki Guide를 브라우저에서 구현한다. 백엔드가 없어 **구조적으로 read-only**다 — 파일을 쓸 수단 자체가 없고, 로드된 위키 페이지를 검색해 context로 넣어 답할 뿐이다. provider(에이전트)는 사용자가 고른다(anthropic/openai 등). 설정·키 취급은 [README §4.6](README.md). 즉 Guide는 두 경로로 쓸 수 있다: (1) MCP 클라이언트(Claude Desktop)의 read tool, (2) 사이트 챗봇.
+
 ## 5. Conflicts / Open Questions
 
 - 서버에 `--read-only` 플래그를 추가해 Wiki Guide를 프로세스 수준에서 강제할지.
